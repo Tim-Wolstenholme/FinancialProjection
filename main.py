@@ -4,6 +4,7 @@ class Investment:
         self.__interest = interest
 
     def __add__(self, other):
+        other = self.__charge_stamp_duty(other)
         self.__holding += other
 
     def __sub__(self, other):
@@ -15,10 +16,14 @@ class Investment:
     def annual_interest(self):
         self.__holding *= self.__interest
 
+    def __charge_stamp_duty(self,amount):
+        return amount*0.995
+
 class ISA:
-    def __init__(self):
+    def __init__(self, isaID):
         self.__holdings:Investment = {}
         self.__total_holdings = 0
+        self.__uniqueID = isaID
 
     def add_holding(self, name, amount, interest):
         self.__holdings[name] = Investment(amount, interest)
@@ -36,5 +41,16 @@ class ISA:
             return "That isn't a holding"
         if amount > self.__holdings[holding]:
             return "Not enough money in the holding"
+        self.__holdings[holding] -= amount
 
+    def get_holdings_amounts(self):
+        proportions = []
+        amounts = []
+        for holding in list(self.__holdings.keys()):
+            amount = holding.get_holding()
+            amounts.append(amount)
+            proportions.append(round(amount/self.__total_holdings,4))
+        return [[self.__holdings.keys()[i],amounts[i],proportions[i]] for i in range(len(self.__holdings))]
 
+    def get_investment_holding(self,holding):
+        return self.__holdings[holding].get_holding()
