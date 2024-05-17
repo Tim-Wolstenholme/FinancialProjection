@@ -1,3 +1,6 @@
+from bs4 import BeautifulSoup
+import requests
+
 class InterestProduct:
     def __init__(self, holding, interest):
         self.__amount = holding
@@ -80,3 +83,25 @@ class ISA:
 
     def get_investment_holding(self,holding):
         return self.__holdings[holding].get_amount()
+
+class Stock:
+    def __init__(self, ticker):
+        self.__ticker = ticker
+        self.__price = -1
+        self.__stock_name = ""
+
+    def get_stock_price(self):
+        self.__update_price()
+        return "$"+self.__price
+
+    def __update_price(self):
+        url = f'https://finance.yahoo.com/quote/{self.__ticker}'
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        stock_price = soup.find("fin-streamer", {'class': 'livePrice svelte-mgkamr'})
+        stock_price = stock_price.getText()
+        self.__price = stock_price
+
+
+stock = Stock("AAPL")
+print(stock.get_stock_price())
