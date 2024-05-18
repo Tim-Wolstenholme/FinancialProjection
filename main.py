@@ -89,19 +89,27 @@ class Stock:
         self.__ticker = ticker
         self.__price = -1
         self.__stock_name = ""
+        self.__market_cap = -1
+        self.__information = {}
 
     def get_stock_price(self):
-        self.__update_price()
         return "$"+self.__price
 
-    def __update_price(self):
+    def get_stock_information(self):
+        self.__update_info()
+        return self.__information
+
+    def __update_info(self):
         url = f'https://finance.yahoo.com/quote/{self.__ticker}'
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
         stock_price = soup.find("fin-streamer", {'class': 'livePrice svelte-mgkamr'})
         stock_price = stock_price.getText()
+        stock_details = soup.findAll("span", {'class': 'svelte-tx3nkj'})
+        for i in range(0, len(stock_details), 2):
+            self.__information[stock_details[i].getText()] = stock_details[i+1].getText()
         self.__price = stock_price
 
-
-stock = Stock("AAPL")
-print(stock.get_stock_price())
+apple = Stock("AAPL")
+print(apple.get_stock_information())
+print(apple.get_stock_price())
